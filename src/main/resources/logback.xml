@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <contextName>logback-demo</contextName>
+
+    <!--输出到控制台 ConsoleAppender-->
+    <appender name="consoleLog1" class="ch.qos.logback.core.ConsoleAppender">
+        <!--展示格式 layout-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d -1 %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!--输出到控制台 ConsoleAppender-->
+    <appender name="consoleLog2" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %level %logger{35} %msg%n</pattern>
+        </encoder>
+    </appender>
+    <timestamp key="bySecond" datePattern="yyyyMMdd"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <!-- use the previously created timestamp to create a uniquely
+             named log file -->
+        <file>log-${bySecond}.log</file>
+        <encoder>
+            <pattern>%d{HH:mm} %level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!--指定最基础的日志输出级别-->
+    <root level="INFO">
+        <!--appender将会添加到这个loger-->
+        <appender-ref ref="consoleLog2"/>
+        <appender-ref ref="FILE"/>
+
+    </root>
+
+</configuration>
