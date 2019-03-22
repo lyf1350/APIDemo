@@ -16,4 +16,6 @@ public class WorkflowTemplate {
     Long id;
     @Column
     String templateName;
+    @Column
+    String templateModel;
 }
