@@ -14,6 +14,8 @@ public class NodeTemplate {
     @Column
     String templateName;
     @Column
+    String nodeKey;
+    @Column
     @OneToMany
     List<Action> actions;
     @Column
@@ -28,4 +30,12 @@ public class NodeTemplate {
     @ManyToMany
     @Column
     List<NodeTemplate> nextNodeTemplate;
+    @Override
+    public boolean equals(Object nodeTemplate){
+        if(nodeTemplate instanceof NodeTemplate){
+            if(((NodeTemplate) nodeTemplate).getId().equals(this.getId()))
+                return true;
+        }
+        return true;
+    }
 }

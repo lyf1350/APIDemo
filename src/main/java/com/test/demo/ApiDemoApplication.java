@@ -17,6 +17,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 @EnableJpaAuditing
 @Slf4j
 public class ApiDemoApplication {
+
     @Bean
     ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer(){
         ConfigurableWebBindingInitializer initializer=new ConfigurableWebBindingInitializer();
@@ -53,6 +54,30 @@ public class ApiDemoApplication {
                 return JSON.parseObject(s,Member.class);
             }
         });
+        service.addConverter(new Converter<String, NodeTemplate>() {
+            @Override
+            public NodeTemplate convert(String s) {
+                log.info("convert NodeTemplate:"+s);
+                return JSON.parseObject(s,NodeTemplate.class);
+            }
+        });
+        service.addConverter(new Converter<String, Reviewer>() {
+            @Override
+            public Reviewer convert(String s) {
+                log.info("convert Reviewer:"+s);
+
+                return JSON.parseObject(s,Reviewer.class);
+            }
+        });
+        service.addConverter(new Converter<String, WorkflowTemplate>() {
+            @Override
+            public WorkflowTemplate convert(String s) {
+                log.info("convert WorkflowTemplate:"+s);
+
+                return JSON.parseObject(s,WorkflowTemplate.class);
+            }
+        });
+
         return initializer;
     }
 

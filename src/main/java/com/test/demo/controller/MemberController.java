@@ -10,6 +10,7 @@ import com.test.demo.repository.UserRepository;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,6 @@ public class MemberController {
 
     @PostMapping("/attach")
     @ApiOperation(value = "用户关联成员", notes = "无", response = JsonResult.class)
-
     public JsonResult attachMember(Group group, Role role, String username) {
         Member member = memberRepository.findByGroupAndRole(group, role);
         if (member == null) {
@@ -47,5 +47,10 @@ public class MemberController {
         user.getMembers().remove(member);
         userRepository.save(user);
         return JsonResult.success();
+    }
+
+    @GetMapping("/list")
+    public JsonResult getAllMembers(){
+        return  JsonResult.success(memberRepository.findAll());
     }
 }
