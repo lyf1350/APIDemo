@@ -3,6 +3,7 @@ package com.test.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.test.demo.common.JsonResult;
+import com.test.demo.common.SocketMessage;
 import com.test.demo.model.Message;
 import com.test.demo.model.MessageState;
 import com.test.demo.model.User;
@@ -42,7 +43,6 @@ public class MessageController {
 
     @PostMapping("/send")
     @ApiOperation(value = "发送邮件或站内信", notes = "无", response = JsonResult.class)
-
     public JsonResult send(String source, String dest, String title, String content, String type, HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("user");
 
@@ -73,7 +73,7 @@ public class MessageController {
         message = messageRepository.save(message);
         for (User u : userSet) {
             MessageState messageState = messageStateRepository.save(new MessageState(u.getID(), 0, message));
-            WebSocketUtil.sendMessage(u.getUsername(), JSON.toJSONString(messageState));
+            WebSocketUtil.sendMessage(u.getUsername(), JSON.toJSONString(new SocketMessage("message",JSON.toJSONString(messageState))));
         }
 
         return JsonResult.success();

@@ -21,11 +21,10 @@ public class RoleController {
     @PostMapping("/create")
     @ApiOperation(value = "创建角色", notes = "无", response = JsonResult.class)
     public JsonResult createRole(Role role) {
+
         roleRepository.save(role);
         return JsonResult.success();
     }
-
-
 
     @PostMapping("/delete")
     @ApiOperation(value = "删除角色", notes = "无", response = JsonResult.class)

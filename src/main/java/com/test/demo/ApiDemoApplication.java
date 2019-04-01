@@ -42,7 +42,6 @@ public class ApiDemoApplication {
             @Override
             public Role convert(String s) {
                 log.info("convert role:"+s);
-
                 return JSON.parseObject(s,Role.class);
             }
         });
@@ -50,7 +49,6 @@ public class ApiDemoApplication {
             @Override
             public Member convert(String s) {
                 log.info("convert Member:"+s);
-
                 return JSON.parseObject(s,Member.class);
             }
         });
@@ -65,7 +63,6 @@ public class ApiDemoApplication {
             @Override
             public Reviewer convert(String s) {
                 log.info("convert Reviewer:"+s);
-
                 return JSON.parseObject(s,Reviewer.class);
             }
         });
@@ -73,11 +70,23 @@ public class ApiDemoApplication {
             @Override
             public WorkflowTemplate convert(String s) {
                 log.info("convert WorkflowTemplate:"+s);
-
                 return JSON.parseObject(s,WorkflowTemplate.class);
             }
         });
-
+        service.addConverter(new Converter<String, Workflow>() {
+            @Override
+            public Workflow convert(String s) {
+                log.info("convert Workflow:"+s);
+                return JSON.parseObject(s,Workflow.class);
+            }
+        });
+        service.addConverter(new Converter<String, Node>() {
+            @Override
+            public Node convert(String s) {
+                log.info("convert Node:"+s);
+                return JSON.parseObject(s,Node.class);
+            }
+        });
         return initializer;
     }
 

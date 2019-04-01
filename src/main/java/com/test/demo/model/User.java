@@ -4,6 +4,8 @@ package com.test.demo.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.List;
@@ -25,6 +27,7 @@ public class User {
     @Column
     String phone;
     @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     List<Member> members;
 
     public User(){

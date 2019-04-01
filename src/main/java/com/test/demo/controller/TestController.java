@@ -9,8 +9,11 @@ import com.test.demo.model.WorkflowTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -20,32 +23,58 @@ import java.util.Map;
 public class TestController {
 
     @GetMapping("")
-    public String test(HttpServletRequest request){
-        log.info("id:"+request.getSession().getId());
-        log.info("test api call user:"+request.getSession().getAttribute("user"));
+    public String test(HttpServletRequest request) {
+        log.info("id:" + request.getSession().getId());
+        log.info("test api call user:" + request.getSession().getAttribute("user"));
         return "abc";
     }
+
     @GetMapping("/test2/{id}")
-    public String test2(int id){
-        return "test2"+id;
+    public String test2(int id) {
+        return "test2" + id;
     }
-    @PostMapping("/1")
-    public JsonResult post(String nodeArray, String fromMap, String toMap, WorkflowTemplate workflowTemplate){
-        log.info("nodeData:"+nodeArray);
-        log.info(("fromMap:"+fromMap));
-        log.info(("toMap:"+toMap));
-        log.info(("workflowTemplate:"+workflowTemplate));
-        List<NodeTemplate> nodeTemplates=JSON.parseArray(nodeArray,NodeTemplate.class);
-        Map<String,List<String>> from=JSON.parseObject(fromMap,Map.class);
-        Map<String,List<String>> to=JSON.parseObject(toMap,Map.class);
-        log.info("nodeTemplate:"+nodeTemplates);
-        log.info("from:"+from);
-        log.info("to:"+to);
-        return JsonResult.success(new User("a","b","c","d"));
+
+    @PostMapping("/1/{path}")
+    public void post(String path, HttpServletResponse response) {
+        try {
+            byte[] bytes = new byte[1024];
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream("D:\\" + path));
+            int i = bufferedInputStream.read(bytes);
+            OutputStream outputStream = response.getOutputStream();
+            while (i != -1) {
+                outputStream.write(bytes, 0, bytes.length);
+                outputStream.flush();
+                i = bufferedInputStream.read(bytes);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
+
+    @GetMapping("/1/{path}")
+    public void get(@PathVariable String path, HttpServletResponse response) {
+        try {
+            log.info("path:" + path);
+            byte[] bytes = new byte[1024];
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream("D:\\" + path));
+            int i = bufferedInputStream.read(bytes);
+            OutputStream outputStream = response.getOutputStream();
+            while (i != -1) {
+                outputStream.write(bytes, 0, bytes.length);
+                outputStream.flush();
+                i = bufferedInputStream.read(bytes);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @GetMapping("/3")
-    public JsonResult test3(String para){
+    public JsonResult test3(String para) {
 
         return JsonResult.success(para);
     }

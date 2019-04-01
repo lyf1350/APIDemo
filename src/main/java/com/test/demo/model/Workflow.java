@@ -23,8 +23,16 @@ public class Workflow {
     @Column
     Timestamp endTime;
     @Column
-    String workflowStatus;
+    String workflowStatus="已开始";
     @ManyToOne
     @JoinColumn
     WorkflowTemplate workflowTemplate;
+
+    public Workflow(User workflowUser, WorkflowTemplate workflowTemplate) {
+        this.workflowUser = workflowUser;
+        this.workflowTemplate = workflowTemplate;
+    }
+    public Workflow(){
+
+    }
 }

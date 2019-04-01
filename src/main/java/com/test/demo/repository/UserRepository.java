@@ -22,4 +22,11 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     @Query("select u from User u join u.members m join m.role r where r.roleName=?1")
     List<User> findByRole(String roleName);
+
+    @Query("select u from User u join u.members m join m.group g where g.id=?1")
+    List<User> findByGroupId(Long id);
+    @Query("select u from User u join u.members m join m.role r where r.id=?1")
+    List<User> findByRoleId(Long id);
+    @Query("select u from User u join u.members m  where m.id=?1")
+    List<User> findByMemberId(Long id);
 }
