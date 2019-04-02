@@ -8,6 +8,7 @@ import com.test.demo.model.WorkflowTemplate;
 import com.test.demo.repository.NodeTemplateRepository;
 import com.test.demo.repository.ReviewerRepository;
 import com.test.demo.repository.WorkflowTemplateRepository;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +39,10 @@ public class WorkflowTemplateController {
     }
 
     @PostMapping("/createOrUpdate")
+    @ApiOperation("创建或更新流程模版")
     public JsonResult createOrUpdateWorkflowTemplate(String nodeArray, String fromMap, String toMap, WorkflowTemplate workflowTemplate){
         workflowTemplate=workflowTemplateRepository.save(workflowTemplate);
         List<NodeTemplate> nodeTemplates= JSON.parseArray(nodeArray,NodeTemplate.class);
-        System.out.println("nodeTemplates:"+nodeTemplates);
         Map<String,NodeTemplate> nodeMap=new HashMap<>();
         for(NodeTemplate nodeTemplate : nodeTemplates){
             NodeTemplate temp=nodeTemplateRepository.findNodeTemplateByNodeKeyAndWorkflowTemplate(nodeTemplate.getNodeKey(),workflowTemplate);
@@ -69,7 +70,6 @@ public class WorkflowTemplateController {
             }
             temp.setPreviousNodeTemplate(new ArrayList<>());
             temp.setNextNodeTemplate(new ArrayList<>());
-            System.out.println("name:"+temp.getTemplateName());
             nodeMap.put(nodeTemplate.getNodeKey(),nodeTemplateRepository.save(temp));
         }
         Map<String,List<String>> from=JSON.parseObject(fromMap,Map.class);

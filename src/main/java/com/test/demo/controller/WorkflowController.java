@@ -4,6 +4,7 @@ import com.test.demo.common.JsonResult;
 import com.test.demo.model.*;
 import com.test.demo.repository.*;
 import com.test.demo.service.NodeService;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,15 +31,13 @@ public class WorkflowController  {
     @Autowired
     NodeService nodeService;
     @PostMapping("create")
+    @ApiOperation(value="创建流程")
     public JsonResult createWorkflow(WorkflowTemplate workflowTemplate, @SessionAttribute User user){
         if(user==null)
             return JsonResult.error();
-        log.info("workflowTemplate:"+workflowTemplate.getId());
-        log.info("user:"+user);
         Workflow workflow=workflowRepository.save(new Workflow(user,workflowTemplate));
         List<NodeTemplate> nodeTemplates=nodeTemplateRepository.findAllByWorkflowTemplate(workflowTemplate);
         Map<NodeTemplate,Node> nodeMap=new HashMap<>();
-        log.info("created workflow");
         Timestamp timestamp=new Timestamp(new Date().getTime());
         Node endNode=nodeRepository.save(new Node(workflow,null,null));
         Node startNode=nodeRepository.save(new Node(workflow,null,null));

@@ -8,6 +8,7 @@ import com.test.demo.repository.WorkflowLogRepository;
 import com.test.demo.repository.WorkflowRepository;
 import com.test.demo.repository.result.NodeReviewer;
 import com.test.demo.service.NodeService;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +52,7 @@ public class NodeController {
         return node.getPreviousNodes().size()>0?getStartNode(node.getPreviousNodes().get(0)):node;
     }
     @PostMapping("/execute")
+    @ApiOperation(value="执行节点",notes="拒绝则重新开始此流程，同意则如果同级节点都完成，则到下一个节点")
     public JsonResult executeNode(Node node, String decision, String remark, @SessionAttribute User user) {
         if (user == null)
             return JsonResult.error();
@@ -153,6 +155,7 @@ public class NodeController {
     }
 
     @GetMapping("/list")
+    @ApiOperation(("/获得用户所有流程"))
     public JsonResult getAllNodes(@SessionAttribute User user) {
         Set<Long> groupSet = new HashSet<>();
         Set<Long> roleSet = new HashSet<>();

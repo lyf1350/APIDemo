@@ -21,10 +21,13 @@ public class File {
     @Column
     @CreatedDate
     Timestamp createTime;
+    @Column
+    String suffix;
 
-    public File(String fileName, String uuid) {
+    public File(String fileName, String uuid,String suffix) {
         this.fileName = fileName;
         this.uuid = uuid;
+        this.suffix=suffix;
     }
 
     public File(){

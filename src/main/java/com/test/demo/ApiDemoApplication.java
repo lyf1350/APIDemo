@@ -87,6 +87,13 @@ public class ApiDemoApplication {
                 return JSON.parseObject(s,Node.class);
             }
         });
+        service.addConverter(new Converter<String, File>() {
+            @Override
+            public File convert(String s) {
+                log.info("convert Node:"+s);
+                return JSON.parseObject(s,File.class);
+            }
+        });
         return initializer;
     }
 

@@ -3,6 +3,7 @@ package com.test.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -12,10 +13,11 @@ import java.util.List;
 
 @Entity
 @Data
-@ApiModel(value="用户")
+@ApiModel(value="用户",description = "user")
 public class User {
     @Id
     @GeneratedValue
+            @ApiModelProperty(value="主键")
     Long ID;
     @Column
     String username;
