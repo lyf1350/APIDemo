@@ -26,12 +26,10 @@ public class NodeTemplate {
     @Column
     @OneToMany
     @LazyCollection(LazyCollectionOption.FALSE)
-
     List<Action> actions;
     @Column
     @OneToMany
     @LazyCollection(LazyCollectionOption.FALSE)
-
     List<Reviewer> reviewers;
     @ManyToOne
     @JoinColumn

@@ -2,12 +2,8 @@ package com.test.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.test.demo.common.JsonResult;
-import com.test.demo.model.NodeTemplate;
-import com.test.demo.model.Reviewer;
-import com.test.demo.model.WorkflowTemplate;
-import com.test.demo.repository.NodeTemplateRepository;
-import com.test.demo.repository.ReviewerRepository;
-import com.test.demo.repository.WorkflowTemplateRepository;
+import com.test.demo.model.*;
+import com.test.demo.repository.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +24,10 @@ public class WorkflowTemplateController {
     NodeTemplateRepository nodeTemplateRepository;
     @Autowired
     ReviewerRepository reviewerRepository;
+    @Autowired
+    NodeRepository nodeRepository;
+    @Autowired
+    WorkflowRepository workflowRepository;
     @GetMapping("/list")
     public JsonResult getAllWorkflowTemplate(){
         return JsonResult.success(workflowTemplateRepository.findAll());
@@ -56,7 +56,7 @@ public class WorkflowTemplateController {
                 for(Reviewer reviewer :nodeTemplate.getReviewers()){
                     boolean find=false;
                     for(Reviewer reviewer1:temp.getReviewers()){
-                        if(reviewer.getReviewerId().equals(reviewer1.getReviewerId())){
+                        if(reviewer.getReviewer().equals(reviewer1.getReviewer())){
                             find=true;
                             reviewers.add(reviewer1);
                             break;
@@ -77,6 +77,16 @@ public class WorkflowTemplateController {
         from.forEach((key,value)->value.forEach(node->nodeMap.get(key).getPreviousNodeTemplate().add(nodeMap.get(node))));
         to.forEach((key,value)->value.forEach(node->nodeMap.get(key).getNextNodeTemplate().add(nodeMap.get(node))));
         nodeTemplateRepository.saveAll(nodeMap.values());
+        return JsonResult.success();
+    }
+
+    @GetMapping("/delete")
+    public JsonResult deleteWorkflowTemplate(Long id){
+        log.info("workflowTemplate id:"+id);
+        WorkflowTemplate workflowTemplate=workflowTemplateRepository.findById(id).get();
+        List<NodeTemplate> nodeTemplates=nodeTemplateRepository.findAllByWorkflowTemplate(workflowTemplate);
+        nodeTemplateRepository.deleteAll(nodeTemplates);
+        workflowTemplateRepository.deleteById(id);
         return JsonResult.success();
     }
 }

@@ -18,7 +18,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        log.info("message:"+payload);
 
         Message m = JSON.parseObject(payload, Message.class);
         switch (m.getType()) {
@@ -42,7 +41,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.info("websocket closed");
         if (session.getAttributes().get("user") != null)
             ONLINE_USER_SESSIONS.remove(((User) session.getAttributes().get("user")).getUsername());
     }

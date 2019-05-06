@@ -27,7 +27,7 @@ public class UserController {
             return JsonResult.error();
         }
         User user = userRepository.findByUsername(username);
-        log.info("username:" + username + " password:" + password + " user:" + user);
+        log.info("timeinterval:"+request.getSession().getMaxInactiveInterval());
         if (user == null)
             return JsonResult.error();
         if (user.getPassword().equals(password)) {

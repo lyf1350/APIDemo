@@ -11,10 +11,6 @@ import java.util.List;
 
 public interface WorkflowLogRepository extends JpaRepository<WorkflowLog,Long> {
 
-    @Query("select  w.startTime from WorkflowLog w where w.workflow=?1")
-    Timestamp findStartTimeByWorkflow(Workflow workflow);
-    @Query("select  w.startTime from WorkflowLog w where w.node=?1")
-    Timestamp findStartTimeByNode(Node node);
 
-    List<WorkflowLog> findAllByWorkflow(Workflow workflow);
+    List<WorkflowLog> findAllByWorkflowId(Long workflowId);
 }

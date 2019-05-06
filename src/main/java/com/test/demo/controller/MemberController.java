@@ -43,7 +43,6 @@ public class MemberController {
     public JsonResult detachMember(Member member, String username) {
 
         User user = userRepository.findByUsername(username);
-        log.info("member:" + member + " user :" + user + " username:" + username);
         user.getMembers().remove(member);
         userRepository.save(user);
         return JsonResult.success();

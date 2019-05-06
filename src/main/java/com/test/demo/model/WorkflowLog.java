@@ -12,15 +12,16 @@ public class WorkflowLog {
     @Id
     @GeneratedValue
     Long id;
-    @ManyToOne
-    @JoinColumn
-    Workflow workflow;
-    @ManyToOne
-    @JoinColumn
-    Node node;
-    @ManyToOne
-    @JoinColumn
-    User person;
+    @Column
+    Long workflowId;
+    @Column
+    String nodeName;
+    @Column
+    Long nodeId;
+    @Column
+    String userName;
+    @Column
+    Long userId;
     @Column
     String decision;
     @Column
@@ -31,9 +32,16 @@ public class WorkflowLog {
     String remark;
 
     public WorkflowLog(Workflow workflow, Node node, User person, String decision, Timestamp startTime, Timestamp endTime, String remark) {
-        this.workflow = workflow;
-        this.node = node;
-        this.person = person;
+        this.workflowId=workflow.getId();
+        if(node!=null){
+            this.nodeName=node.getNodeName();
+            this.nodeId=node.getId();
+        }
+        if(person!=null){
+            this.userName=person.getUsername();
+            this.userId=person.getID();
+        }
+
         this.decision = decision;
         this.startTime = startTime;
         this.endTime = endTime;

@@ -25,9 +25,10 @@ public class Node {
     @JoinColumn
     @ManyToOne
     Workflow workflow;
-    @JoinColumn
-    @ManyToOne
-    NodeTemplate nodeTemplate;
+    @Column
+    String nodeName;
+    @Column
+    String nodeKey;
     @Column
     @OneToMany
     @LazyCollection(LazyCollectionOption.FALSE)
@@ -46,10 +47,13 @@ public class Node {
     Timestamp startTime;
     @Column
     Timestamp endTime;
-
     public Node(Workflow workflow, NodeTemplate nodeTemplate, List<Signoff> signoffs) {
         this.workflow = workflow;
-        this.nodeTemplate = nodeTemplate;
+        if(nodeTemplate!=null){
+            this.nodeKey = nodeTemplate.getNodeKey();
+            this.nodeName=nodeTemplate.getTemplateName();
+        }
+
         this.signoffs = signoffs;
     }
     public Node(){

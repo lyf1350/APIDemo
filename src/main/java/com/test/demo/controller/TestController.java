@@ -1,12 +1,16 @@
 package com.test.demo.controller;
 
 
+import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.test.demo.common.JsonResult;
 import com.test.demo.model.NodeTemplate;
 import com.test.demo.model.User;
 import com.test.demo.model.WorkflowTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.spring.web.json.Json;
@@ -22,11 +26,15 @@ import java.util.Map;
 @Slf4j
 public class TestController {
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
     @GetMapping("")
-    public String test(HttpServletRequest request) {
+    public JsonResult test(HttpServletRequest request) {
         log.info("id:" + request.getSession().getId());
         log.info("test api call user:" + request.getSession().getAttribute("user"));
-        return "abc";
+        List map=jdbcTemplate.queryForList("select * from file");
+        Console.log(map);
+        return  JsonResult.success(map);
     }
 
     @GetMapping("/test2/{id}")

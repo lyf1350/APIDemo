@@ -5,7 +5,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.sql.Time;
 import java.sql.Timestamp;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
@@ -24,13 +23,22 @@ public class Workflow {
     Timestamp endTime;
     @Column
     String workflowStatus="已开始";
-    @ManyToOne
+    @Column
+    String workflowName;
+    @Column
+    String workflowModel;
+    @Column
+    String workflowLayout;
     @JoinColumn
-    WorkflowTemplate workflowTemplate;
+    @OneToOne
+    Property property;
 
-    public Workflow(User workflowUser, WorkflowTemplate workflowTemplate) {
+    public Workflow(User workflowUser, WorkflowTemplate workflowTemplate,Property property) {
         this.workflowUser = workflowUser;
-        this.workflowTemplate = workflowTemplate;
+        this.workflowName=workflowTemplate.getTemplateName();
+        this.workflowModel=workflowTemplate.getTemplateModel();
+        this.workflowLayout=workflowTemplate.getTemplateLayout();
+        this.property=property;
     }
     public Workflow(){
 

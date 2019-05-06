@@ -14,7 +14,6 @@ public class Action {
     @JoinColumn
     @ManyToOne
     ActionTemplate actionTemplate;
-    @JoinColumn
-    @OneToMany
-    List<Argument> arguments;
+    @Column
+    String actionArguments;
 }

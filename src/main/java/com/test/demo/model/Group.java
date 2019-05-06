@@ -25,4 +25,17 @@ public class Group {
     public Group(String group){
         this.groupName=group;
     }
+
+    @Override
+    public boolean equals(Object object){
+        if(object!=null&&object instanceof Group){
+            return ((Group) object).getId().equals(this.getId());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return this.getId().hashCode();
+    }
 }

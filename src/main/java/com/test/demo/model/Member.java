@@ -25,4 +25,17 @@ public class Member {
         this.group=group;
         this.role=role;
     }
+
+    @Override
+    public boolean equals(Object object){
+        if(object!=null&&object instanceof Member){
+            return ((Member) object).getId().equals(this.getId());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return this.getId().hashCode();
+    }
 }

@@ -10,4 +10,5 @@ public interface NodeTemplateRepository extends JpaRepository<NodeTemplate,Long>
 
     List<NodeTemplate> findAllByWorkflowTemplate(WorkflowTemplate workflowTemplate);
     NodeTemplate findNodeTemplateByNodeKeyAndWorkflowTemplate(String nodeKey, WorkflowTemplate workflowTemplate);
+
 }

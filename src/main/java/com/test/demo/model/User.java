@@ -17,7 +17,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue
-            @ApiModelProperty(value="主键")
+    @ApiModelProperty(value="主键")
     Long ID;
     @Column
     String username;
@@ -31,7 +31,8 @@ public class User {
     @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
     List<Member> members;
-
+    @Column
+    Integer state;
     public User(){
     }
     public User(String username, String password, String email, String phone) {
@@ -39,6 +40,7 @@ public class User {
         this.password = password;
         this.email = email;
         this.phone = phone;
+        this.state=1;
     }
 
     public User(Long ID,String username, String password, String email, String phone, List<Member> members) {
@@ -48,5 +50,17 @@ public class User {
         this.email = email;
         this.phone = phone;
         this.members = members;
+    }
+    @Override
+    public boolean equals(Object object){
+        if(object!=null&&object instanceof User){
+            return ((User) object).getID().equals(this.getID());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return this.getID().hashCode();
     }
 }

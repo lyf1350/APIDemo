@@ -1,5 +1,6 @@
 package com.test.demo.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.test.demo.common.JsonResult;
 import com.test.demo.model.*;
 import com.test.demo.repository.*;
@@ -30,12 +31,19 @@ public class WorkflowController  {
     NodeTemplateRepository nodeTemplateRepository;
     @Autowired
     NodeService nodeService;
+    @Autowired
+    ReviewerRepository reviewerRepository;
+    @Autowired
+    PropertyRepository propertyRepository;
     @PostMapping("create")
     @ApiOperation(value="创建流程")
-    public JsonResult createWorkflow(WorkflowTemplate workflowTemplate, @SessionAttribute User user){
-        if(user==null)
-            return JsonResult.error();
-        Workflow workflow=workflowRepository.save(new Workflow(user,workflowTemplate));
+    public JsonResult createWorkflow(WorkflowTemplate workflowTemplate,String nodeArray ,@SessionAttribute User user){
+        List<NodeTemplate> nodeTemplates1= JSON.parseArray(nodeArray,NodeTemplate.class);
+        log.info("nodeArray:"+nodeArray);
+        log.info("nodeTemplate:"+nodeTemplates1);
+        Map<String,List<Reviewer>> nodeReviewerMap=new HashMap<>();
+        nodeTemplates1.forEach(e->nodeReviewerMap.put(e.getNodeKey(),e.getReviewers()));
+        Workflow workflow=workflowRepository.save(new Workflow(user,workflowTemplate,propertyRepository.save(new Property())));
         List<NodeTemplate> nodeTemplates=nodeTemplateRepository.findAllByWorkflowTemplate(workflowTemplate);
         Map<NodeTemplate,Node> nodeMap=new HashMap<>();
         Timestamp timestamp=new Timestamp(new Date().getTime());
@@ -43,11 +51,8 @@ public class WorkflowController  {
         Node startNode=nodeRepository.save(new Node(workflow,null,null));
         nodeTemplates.forEach(nodeTemplate -> {
             List<Signoff> signoffs=new ArrayList<>();
-            nodeTemplate.getReviewers().forEach(reviewer -> {
-                signoffs.add(new Signoff(reviewer));
-            });
+            nodeReviewerMap.get(nodeTemplate.getNodeKey()).forEach(reviewer ->signoffs.add(new Signoff(reviewerRepository.save(reviewer))) );
             Node node=nodeRepository.save(new Node(workflow,nodeTemplate,signoffRepository.saveAll(signoffs)));
-
             if(nodeTemplate.getPreviousNodeTemplate()==null||nodeTemplate.getPreviousNodeTemplate().size()==0){
                 startNode.getNextNodes().add(node);
                 node.getPreviousNodes().add(startNode);
@@ -79,6 +84,24 @@ public class WorkflowController  {
     @PostMapping("/log")
     public JsonResult getLog(Workflow workflow){
         log.info("workflow:"+workflow);
-        return JsonResult.success(workflowLogRepository.findAllByWorkflow(workflow));
+        return JsonResult.success(workflowLogRepository.findAllByWorkflowId(workflow.getId()));
+    }
+    @PostMapping("/delete")
+    public JsonResult deleteWorkflow(Long id){
+        log.info("workflow:"+id);
+        List<WorkflowLog> logs=workflowLogRepository.findAllByWorkflowId(id);
+        workflowLogRepository.deleteAll(logs);
+        List<Node> nodes=nodeRepository.findAllByWorkflow(id);
+        nodeRepository.deleteAll(nodes);
+        workflowRepository.deleteById(id);
+        return  JsonResult.success();
+    }
+
+    @PostMapping("/save")
+    public JsonResult saveWorkflow(Long id,String property){
+        Property property1=workflowRepository.findPropertyById(id);
+        property1.setProperty(property);
+        propertyRepository.save(property1);
+        return JsonResult.success();
     }
 }

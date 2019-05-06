@@ -79,14 +79,13 @@ public class NodeController {
             nodeRepository.saveAll(nodeSet);
             return JsonResult.success();
         }
-        Set<Long> groupSet = new HashSet<>();
-        Set<Long> roleSet = new HashSet<>();
-        Set<Long> memberSet = new HashSet<>();
+        Set<Group> groupSet = new HashSet<>();
+        Set<Role> roleSet = new HashSet<>();
+        List<Member> members = user.getMembers();
 
-        user.getMembers().forEach(member -> {
-            groupSet.add(member.getGroup().getId());
-            roleSet.add(member.getRole().getId());
-            memberSet.add(member.getId());
+        members.forEach(member -> {
+            groupSet.add(member.getGroup());
+            roleSet.add(member.getRole());
         });
         int signoffCnt = 0;
         for (Signoff signoff : node.getSignoffs()) {
@@ -94,21 +93,15 @@ public class NodeController {
                 continue;
             signoffCnt++;
             boolean approve=false;
-            switch (signoff.getReviewer().getType()) {
-                case "user":
-                    approve=user.getID().equals(signoff.getReviewer().getReviewerId());
-                        break;
-                case "member":
-                    approve=memberSet.contains(signoff.getReviewer().getReviewerId());
-                        break;
-                case "group":
-                    approve=groupSet.contains(signoff.getReviewer().getReviewerId());
-                        break;
-                case "role":
-                    approve=roleSet.contains(signoff.getReviewer().getReviewerId());
-                        break;
-                default:
-                    break;
+            Object reviewer=signoff.getReviewer().getReviewer();
+            if(reviewer instanceof User){
+                approve=user.equals(reviewer);
+            }else if(reviewer instanceof Member){
+                approve=members.contains(reviewer);
+            }else if(reviewer instanceof Group){
+                approve=groupSet.contains(reviewer);
+            }else if(reviewer instanceof Role){
+                approve=roleSet.contains(reviewer);
             }
             if(approve){
                 log.info("ty");
@@ -134,10 +127,11 @@ public class NodeController {
                 }
             }
             if (complete) {
-                if(node.getNextNodes().size()==0||node.getNextNodes().size()==1&& node.getNextNodes().get(0).getNodeTemplate()==null){
+                if(node.getNextNodes().size()==0||node.getNextNodes().size()==1&& node.getNextNodes().get(0).getNodeName()==null){
+                    log.info("end workflow:"+node.getWorkflow().getId());
                     node.getWorkflow().setWorkflowStatus("已完成");
                     workflowRepository.save(node.getWorkflow());
-                    workflowLogRepository.save(new WorkflowLog(node.getWorkflow(),null,null,"结束流程",now,now,""));
+                    workflowLogRepository.save(new WorkflowLog(node.getWorkflow(),null,user,"结束流程",now,now,""));
                 }else{
                     for (Node node1 : node.getNextNodes()) {
                         node1.setNodeStatus("已开始");
@@ -157,21 +151,19 @@ public class NodeController {
     @GetMapping("/list")
     @ApiOperation(("/获得用户所有流程"))
     public JsonResult getAllNodes(@SessionAttribute User user) {
-        Set<Long> groupSet = new HashSet<>();
-        Set<Long> roleSet = new HashSet<>();
-        Set<Long> memberSet = new HashSet<>();
+        Set<Group> groupSet = new HashSet<>();
+        Set<Role> roleSet = new HashSet<>();
 
         user.getMembers().forEach(member -> {
-            groupSet.add(member.getGroup().getId());
-            roleSet.add(member.getRole().getId());
-            memberSet.add(member.getId());
+            groupSet.add(member.getGroup());
+            roleSet.add(member.getRole());
         });
-        List<Long> reviewerId = new ArrayList<>();
-        reviewerId.add(user.getID());
-        reviewerId.addAll(groupSet);
-        reviewerId.addAll(roleSet);
-        reviewerId.addAll(memberSet);
-        List<NodeReviewer> nodeReviewers = nodeRepository.findByUser(reviewerId);
+
+        List<NodeReviewer> nodeReviewers = new ArrayList<>();
+        nodeReviewers.addAll(nodeRepository.findAllByGroup(groupSet));
+        nodeReviewers.addAll(nodeRepository.findAllByRole(roleSet));
+        nodeReviewers.addAll(nodeRepository.findAllByMember(user.getMembers()));
+        nodeReviewers.addAll(nodeRepository.findAllByUser(user));
         Set<Workflow> finishedWorkflows = new HashSet<>();
         Set<Workflow> executedWorkflows = new HashSet<>();
         Set<Workflow> pendingWorkflows = new HashSet<>();

@@ -18,4 +18,6 @@ public class WorkflowTemplate {
     String templateName;
     @Column
     String templateModel;
+    @Column
+    String templateLayout;
 }

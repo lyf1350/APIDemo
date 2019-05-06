@@ -23,11 +23,15 @@ public class File {
     Timestamp createTime;
     @Column
     String suffix;
+    @JoinColumn
+    @ManyToOne
+    User uploader;
 
-    public File(String fileName, String uuid,String suffix) {
+    public File(String fileName, String uuid,String suffix,User uploader) {
         this.fileName = fileName;
         this.uuid = uuid;
         this.suffix=suffix;
+        this.uploader=uploader;
     }
 
     public File(){
