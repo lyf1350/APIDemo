@@ -1,6 +1,7 @@
 package com.test.demo.model;
 
 
+import com.alibaba.fastjson.annotation.JSONType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,12 +14,11 @@ import java.util.List;
 
 @Entity
 @Data
-@ApiModel(value="用户",description = "user")
+@JSONType(ignores = {"password"})
 public class User {
     @Id
     @GeneratedValue
-    @ApiModelProperty(value="主键")
-    Long ID;
+    Long id;
     @Column
     String username;
     @Column
@@ -44,7 +44,7 @@ public class User {
     }
 
     public User(Long ID,String username, String password, String email, String phone, List<Member> members) {
-        this.ID=ID;
+        this.id=ID;
         this.username = username;
         this.password = password;
         this.email = email;
@@ -54,13 +54,13 @@ public class User {
     @Override
     public boolean equals(Object object){
         if(object!=null&&object instanceof User){
-            return ((User) object).getID().equals(this.getID());
+            return ((User) object).getId().equals(this.getId());
         }
         return false;
     }
 
     @Override
     public int hashCode(){
-        return this.getID().hashCode();
+        return this.getId().hashCode();
     }
 }

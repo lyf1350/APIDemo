@@ -39,7 +39,7 @@ public class WorkflowLog {
         }
         if(person!=null){
             this.userName=person.getUsername();
-            this.userId=person.getID();
+            this.userId=person.getId();
         }
 
         this.decision = decision;

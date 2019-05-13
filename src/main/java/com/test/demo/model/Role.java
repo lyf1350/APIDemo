@@ -7,7 +7,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@ApiModel(value="角色")
 public class Role {
     @Id
     @GeneratedValue

@@ -7,7 +7,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@ApiModel(value="消息状态")
 public class MessageState {
     @Id
     @GeneratedValue

@@ -46,7 +46,7 @@ public class Reviewer {
     }
 
     public Long getReviewerId(){
-        return user!=null?user.getID():member!=null?member.getId():group!=null?group.getId():role!=null?role.getId():null;
+        return user!=null?user.getId():member!=null?member.getId():group!=null?group.getId():role!=null?role.getId():null;
     }
 
 

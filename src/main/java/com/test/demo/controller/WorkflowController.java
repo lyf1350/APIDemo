@@ -35,6 +35,8 @@ public class WorkflowController  {
     ReviewerRepository reviewerRepository;
     @Autowired
     PropertyRepository propertyRepository;
+    @Autowired
+    MemberRepository memberRepository;
     @PostMapping("create")
     @ApiOperation(value="创建流程")
     public JsonResult createWorkflow(WorkflowTemplate workflowTemplate,String nodeArray ,@SessionAttribute User user){
@@ -47,18 +49,25 @@ public class WorkflowController  {
         List<NodeTemplate> nodeTemplates=nodeTemplateRepository.findAllByWorkflowTemplate(workflowTemplate);
         Map<NodeTemplate,Node> nodeMap=new HashMap<>();
         Timestamp timestamp=new Timestamp(new Date().getTime());
-        Node endNode=nodeRepository.save(new Node(workflow,null,null));
         Node startNode=nodeRepository.save(new Node(workflow,null,null));
+
+        Node endNode=nodeRepository.save(new Node(workflow,null,null));
         nodeTemplates.forEach(nodeTemplate -> {
             List<Signoff> signoffs=new ArrayList<>();
-            nodeReviewerMap.get(nodeTemplate.getNodeKey()).forEach(reviewer ->signoffs.add(new Signoff(reviewerRepository.save(reviewer))) );
+            nodeReviewerMap.get(nodeTemplate.getNodeKey()).forEach(reviewer ->{
+                if(reviewer.getType().equals("member")){
+                    reviewer.setMember(memberRepository.findByGroupAndRole(reviewer.getGroup(),reviewer.getRole()));
+                }
+                signoffs.add(new Signoff(reviewerRepository.save(reviewer)));
+            } );
             Node node=nodeRepository.save(new Node(workflow,nodeTemplate,signoffRepository.saveAll(signoffs)));
             if(nodeTemplate.getPreviousNodeTemplate()==null||nodeTemplate.getPreviousNodeTemplate().size()==0){
                 startNode.getNextNodes().add(node);
                 node.getPreviousNodes().add(startNode);
                 node.setNodeStatus("已开始");
                 node.setStartTime(timestamp);
-                nodeService.notifyUser(node);
+                node.setNodeLevel(0);
+                nodeService.notifyUser(node,0);
             }
             if(nodeTemplate.getNextNodeTemplate()==null||nodeTemplate.getNextNodeTemplate().size()==0){
                 node.getNextNodes().add(endNode);
@@ -81,16 +90,15 @@ public class WorkflowController  {
         return JsonResult.success();
     }
 
-    @PostMapping("/log")
-    public JsonResult getLog(Workflow workflow){
-        log.info("workflow:"+workflow);
-        return JsonResult.success(workflowLogRepository.findAllByWorkflowId(workflow.getId()));
+    @GetMapping("/log")
+    public JsonResult getLog(Long id){
+        log.info("workflow:"+id);
+        return JsonResult.success(workflowLogRepository.findAllByWorkflowId(id));
     }
     @PostMapping("/delete")
     public JsonResult deleteWorkflow(Long id){
         log.info("workflow:"+id);
-        List<WorkflowLog> logs=workflowLogRepository.findAllByWorkflowId(id);
-        workflowLogRepository.deleteAll(logs);
+
         List<Node> nodes=nodeRepository.findAllByWorkflow(id);
         nodeRepository.deleteAll(nodes);
         workflowRepository.deleteById(id);

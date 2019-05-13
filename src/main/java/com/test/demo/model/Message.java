@@ -12,7 +12,6 @@ import java.util.Date;
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@ApiModel(value="消息")
 public class Message {
     @Id
     @GeneratedValue

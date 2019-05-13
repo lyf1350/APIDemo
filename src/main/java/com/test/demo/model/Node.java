@@ -14,8 +14,8 @@ import java.util.List;
 
 @Data
 @Entity
-@JSONType(ignores = {"nextNodes","previousNodes"})
-@ToString(exclude = {"previousNodes","nextNodes"})
+@JSONType(ignores = {"nextNodes","previousNodes","actions"})
+@ToString(exclude = {"previousNodes","nextNodes","actions"})
 public class Node {
     @Id
     @GeneratedValue
@@ -47,13 +47,20 @@ public class Node {
     Timestamp startTime;
     @Column
     Timestamp endTime;
+    @Column
+    Integer nodeLevel=1;
+    @Column
+    @JsonIgnore
+    @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    List<Action> actions;
     public Node(Workflow workflow, NodeTemplate nodeTemplate, List<Signoff> signoffs) {
         this.workflow = workflow;
         if(nodeTemplate!=null){
             this.nodeKey = nodeTemplate.getNodeKey();
             this.nodeName=nodeTemplate.getTemplateName();
+            this.actions=nodeTemplate.getActions();
         }
-
         this.signoffs = signoffs;
     }
     public Node(){

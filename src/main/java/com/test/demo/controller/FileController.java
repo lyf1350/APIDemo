@@ -55,8 +55,7 @@ public class FileController {
             InputStream inputStream = new FileInputStream(file);
             OutputStream outputStream = response.getOutputStream();
 
-            IOUtils.copy(inputStream, outputStream);
-            outputStream.flush();
+            IoUtil.copy(inputStream, outputStream);
 
         } catch (Exception e) {
             e.printStackTrace();

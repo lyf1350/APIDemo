@@ -7,7 +7,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@ApiModel(value="成员")
 public class Member {
     @Id
     @GeneratedValue

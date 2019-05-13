@@ -2,10 +2,7 @@ package com.test.demo.controller;
 
 import com.test.demo.common.JsonResult;
 import com.test.demo.model.*;
-import com.test.demo.repository.NodeRepository;
-import com.test.demo.repository.SignoffRepository;
-import com.test.demo.repository.WorkflowLogRepository;
-import com.test.demo.repository.WorkflowRepository;
+import com.test.demo.repository.*;
 import com.test.demo.repository.result.NodeReviewer;
 import com.test.demo.service.NodeService;
 import io.swagger.annotations.ApiOperation;
@@ -34,10 +31,14 @@ public class NodeController {
     @Autowired
     NodeService nodeService;
 
+    @Autowired
+    PropertyRepository propertyRepository;
+
     private void setNodes(List<Node> nodes,Set<Node> nodeSet){
         nodes.forEach(node -> {
             if(!node.getNodeStatus().equals("未开始")){
                 node.setNodeStatus("未开始");
+                nodeService.notifyUser(node,0);
                 node.setStartTime(null);
                 node.setEndTime(null);
                 node.getSignoffs().forEach(signoff -> signoff.setSignoffStatus("未做决定"));
@@ -48,21 +49,23 @@ public class NodeController {
         });
     }
 
-    private Node getStartNode(Node node){
-        return node.getPreviousNodes().size()>0?getStartNode(node.getPreviousNodes().get(0)):node;
-    }
+
     @PostMapping("/execute")
     @ApiOperation(value="执行节点",notes="拒绝则重新开始此流程，同意则如果同级节点都完成，则到下一个节点")
-    public JsonResult executeNode(Node node, String decision, String remark, @SessionAttribute User user) {
-        if (user == null)
-            return JsonResult.error();
-        node=nodeRepository.findById(node.getId()).get();
+    public JsonResult executeNode(Long id, String decision, String remark,String property, @SessionAttribute User user) {
+
+        Node node=nodeRepository.findById(id).get();
+        Property prop=node.getWorkflow().getProperty();
+        prop.setProperty(property);
+        propertyRepository.save(prop);
         log.info("node:"+node+"\ndecision:"+decision+" remark:"+remark);
         Timestamp now = new Timestamp(new Date().getTime());
         WorkflowLog workflowLog = new WorkflowLog(node.getWorkflow(), node, user, decision, node.getStartTime(), now, remark);
         workflowLogRepository.save(workflowLog);
         if (decision.equals("拒绝")) {
-            Node startNode=getStartNode(node);
+            Node startNode=nodeService.getStartNode(node);
+            node.setNodeStatus("未开始");
+            nodeService.notifyUser(node,0);
             Set<Node> nodeSet=new HashSet<>();
             startNode.getNextNodes().forEach(node1 -> {
                 if(!node1.getNodeStatus().equals("已开始")){
@@ -73,6 +76,8 @@ public class NodeController {
                     signoffRepository.saveAll(node1.getSignoffs());
                     nodeSet.add(node1);
                     setNodes(node1.getNextNodes(),nodeSet);
+                    nodeService.notifyUser(node1,0);
+
                 }
             });
             log.info("nodeset:"+nodeSet);
@@ -132,16 +137,19 @@ public class NodeController {
                     node.getWorkflow().setWorkflowStatus("已完成");
                     workflowRepository.save(node.getWorkflow());
                     workflowLogRepository.save(new WorkflowLog(node.getWorkflow(),null,user,"结束流程",now,now,""));
+                    nodeService.notifyUser(node,1);
+
                 }else{
+                    nodeService.notifyUser(node,0);
                     for (Node node1 : node.getNextNodes()) {
-                        node1.setNodeStatus("已开始");
-                        node1.setStartTime(now);
-                        nodeService.notifyUser(node);
+                        if(node1.getNodeStatus().equals("未开始")){
+                            node1.setNodeStatus("已开始");
+                            node1.setStartTime(now);
+                            nodeService.notifyUser(node1,0);
+                        }
                     }
                     nodeRepository.saveAll(node.getNextNodes());
                 }
-
-
             }
         }
 
@@ -192,6 +200,8 @@ public class NodeController {
         map.put("pending", pendingNodes);
         return JsonResult.success(map);
     }
+
+
 
 
 
