@@ -27,8 +27,9 @@ public class UserController {
             return JsonResult.error();
         }
         User user = userRepository.findByUsername(username);
-        log.info("timeinterval:"+request.getSession().getMaxInactiveInterval());
         if (user == null)
+            return JsonResult.error();
+        if(user.getState()==0)
             return JsonResult.error();
         if (user.getPassword().equals(password)) {
             request.getSession().setAttribute("user", user);
@@ -60,5 +61,21 @@ public class UserController {
     @ApiOperation(value = "获得所有用户", notes = "无", response = JsonResult.class)
     public JsonResult getUsers() {
         return JsonResult.success(userRepository.findAll());
+    }
+
+    @GetMapping("/list/valid")
+    @ApiOperation(value = "获得所有有效用户", notes = "无", response = JsonResult.class)
+    public JsonResult getValidUsers() {
+        return JsonResult.success(userRepository.findAllByState(1));
+    }
+
+    @PostMapping("/save")
+    @ApiOperation(value = "保存", notes = "无", response = JsonResult.class)
+    public JsonResult save(User user) {
+        if(user.getPassword()==null)
+            user.setPassword(userRepository.findByUsername(user.getUsername()).getPassword());
+        userRepository.save(user);
+        return JsonResult.success();
+
     }
 }

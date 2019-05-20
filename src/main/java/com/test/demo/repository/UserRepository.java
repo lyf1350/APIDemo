@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User,Long> {
     User findByUsername(String username);
+    List<User> findAllByState(int state);
     @Transactional
     @Modifying
     @Query("update User set username = ?1 where id = ?2")

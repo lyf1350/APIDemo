@@ -33,9 +33,12 @@ public class MemberController {
             member = memberRepository.save(member);
         }
         User user = userRepository.findByUsername(username);
-        user.getMembers().add(member);
-        userRepository.save(user);
-        return JsonResult.success();
+        if(!user.getMembers().contains(member)){
+            user.getMembers().add(member);
+            userRepository.save(user);
+            return JsonResult.success(member);
+        }
+        return JsonResult.error();
     }
 
     @PostMapping("/detach")

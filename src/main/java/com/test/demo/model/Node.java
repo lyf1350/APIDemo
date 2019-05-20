@@ -54,13 +54,13 @@ public class Node {
     @OneToMany
     @LazyCollection(LazyCollectionOption.FALSE)
     List<Action> actions;
-    public Node(Workflow workflow, NodeTemplate nodeTemplate, List<Signoff> signoffs) {
+    public Node(Workflow workflow, NodeTemplate nodeTemplate, List<Signoff> signoffs,List<Action> actions) {
         this.workflow = workflow;
         if(nodeTemplate!=null){
             this.nodeKey = nodeTemplate.getNodeKey();
             this.nodeName=nodeTemplate.getTemplateName();
-            this.actions=nodeTemplate.getActions();
         }
+        this.actions=actions;
         this.signoffs = signoffs;
     }
     public Node(){

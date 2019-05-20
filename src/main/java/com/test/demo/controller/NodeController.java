@@ -34,17 +34,16 @@ public class NodeController {
     @Autowired
     PropertyRepository propertyRepository;
 
-    private void setNodes(List<Node> nodes,Set<Node> nodeSet){
+    private void setNodes(List<Node> nodes,Set<Node> nodeSet,Set<Node> notSet){
         nodes.forEach(node -> {
             if(!node.getNodeStatus().equals("未开始")){
                 node.setNodeStatus("未开始");
-                nodeService.notifyUser(node,0);
                 node.setStartTime(null);
                 node.setEndTime(null);
                 node.getSignoffs().forEach(signoff -> signoff.setSignoffStatus("未做决定"));
-                signoffRepository.saveAll(node.getSignoffs());
                 nodeSet.add(node);
-                setNodes(node.getNextNodes(),nodeSet);
+                notSet.add(node);
+                setNodes(node.getNextNodes(),nodeSet,notSet);
             }
         });
     }
@@ -60,27 +59,36 @@ public class NodeController {
         propertyRepository.save(prop);
         log.info("node:"+node+"\ndecision:"+decision+" remark:"+remark);
         Timestamp now = new Timestamp(new Date().getTime());
-        WorkflowLog workflowLog = new WorkflowLog(node.getWorkflow(), node, user, decision, node.getStartTime(), now, remark);
+        WorkflowLog workflowLog = new WorkflowLog(node.getWorkflow().getId(), node, user, decision, node.getStartTime(), now, remark);
         workflowLogRepository.save(workflowLog);
         if (decision.equals("拒绝")) {
             Node startNode=nodeService.getStartNode(node);
             node.setNodeStatus("未开始");
-            nodeService.notifyUser(node,0);
             Set<Node> nodeSet=new HashSet<>();
-            startNode.getNextNodes().forEach(node1 -> {
+            Set<Node> notSet=new HashSet<>();
+            for(Node node1:startNode.getNextNodes()){
                 if(!node1.getNodeStatus().equals("已开始")){
+                    for(Action action:node1.getActions()){
+                        Object obj=action.execute("pre");
+                        if(obj!=null){
+                            return JsonResult.error(obj.toString());
+                        }
+                    }
                     node1.setNodeStatus("已开始");
                     node1.setStartTime(now);
                     node1.setEndTime(null);
                     node1.getSignoffs().forEach(signoff -> signoff.setSignoffStatus("未做决定"));
-                    signoffRepository.saveAll(node1.getSignoffs());
                     nodeSet.add(node1);
-                    setNodes(node1.getNextNodes(),nodeSet);
-                    nodeService.notifyUser(node1,0);
-
+                    notSet.add(node1);
+                    setNodes(node1.getNextNodes(),nodeSet,notSet);
                 }
-            });
+            }
+
             log.info("nodeset:"+nodeSet);
+            notSet.forEach(node1 -> {
+                nodeService.notifyUser(node1,0);
+                signoffRepository.saveAll(node1.getSignoffs());
+            });
             nodeRepository.saveAll(nodeSet);
             return JsonResult.success();
         }
@@ -93,6 +101,7 @@ public class NodeController {
             roleSet.add(member.getRole());
         });
         int signoffCnt = 0;
+        List<Signoff> signoffs=new ArrayList<>();
         for (Signoff signoff : node.getSignoffs()) {
             if (!signoff.getSignoffStatus().equals("未做决定"))
                 continue;
@@ -109,16 +118,18 @@ public class NodeController {
                 approve=roleSet.contains(reviewer);
             }
             if(approve){
-                log.info("ty");
                 signoff.setSignoffStatus("已同意");
-                signoffRepository.save(signoff);
+                signoffs.add(signoff);
                 signoffCnt--;
             }
         }
         if (signoffCnt == 0) {
-            node.setNodeStatus("已完成");
-            node.setEndTime(now);
-            nodeRepository.save(node);
+            for(Action action:node.getActions()){
+                Object obj=action.execute("post");
+                if(obj!=null)
+                    return JsonResult.error(obj.toString());
+            }
+
             boolean complete = true;
             log.info("node:"+node);
             for (Node node1 : node.getNextNodes()
@@ -136,23 +147,32 @@ public class NodeController {
                     log.info("end workflow:"+node.getWorkflow().getId());
                     node.getWorkflow().setWorkflowStatus("已完成");
                     workflowRepository.save(node.getWorkflow());
-                    workflowLogRepository.save(new WorkflowLog(node.getWorkflow(),null,user,"结束流程",now,now,""));
+                    workflowLogRepository.save(new WorkflowLog(node.getWorkflow().getId(),null,user,"结束流程",now,now,""));
                     nodeService.notifyUser(node,1);
-
                 }else{
-                    nodeService.notifyUser(node,0);
+                    List<Node> nodes=new ArrayList<>();
                     for (Node node1 : node.getNextNodes()) {
                         if(node1.getNodeStatus().equals("未开始")){
+                            for(Action action:node1.getActions()){
+                                Object obj=action.execute("pre");
+                                if(obj!=null)
+                                    return JsonResult.error(obj.toString());
+                            }
                             node1.setNodeStatus("已开始");
                             node1.setStartTime(now);
-                            nodeService.notifyUser(node1,0);
+                            nodes.add(node1);
                         }
                     }
+                    nodes.forEach(node1 -> nodeService.notifyUser(node1,0));
+                    nodeService.notifyUser(node,0);
                     nodeRepository.saveAll(node.getNextNodes());
                 }
             }
+            node.setNodeStatus("已完成");
+            node.setEndTime(now);
+            nodeRepository.save(node);
         }
-
+        signoffRepository.saveAll(signoffs);
         return JsonResult.success();
     }
 

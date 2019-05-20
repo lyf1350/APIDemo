@@ -72,6 +72,8 @@ public class MessageController {
 
         message = messageRepository.save(message);
         for (User u : userSet) {
+            if(u.getState()!=1)
+                continue;
             MessageState messageState = messageStateRepository.save(new MessageState(u.getId(), 0, message));
             WebSocketUtil.sendMessage(u.getUsername(), JSON.toJSONString(new SocketMessage("message",JSON.toJSONString(messageState))));
         }

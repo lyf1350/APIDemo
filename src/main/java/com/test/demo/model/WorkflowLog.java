@@ -31,8 +31,8 @@ public class WorkflowLog {
     @Column
     String remark;
 
-    public WorkflowLog(Workflow workflow, Node node, User person, String decision, Timestamp startTime, Timestamp endTime, String remark) {
-        this.workflowId=workflow.getId();
+    public WorkflowLog(Long id, Node node, User person, String decision, Timestamp startTime, Timestamp endTime, String remark) {
+        this.workflowId=id;
         if(node!=null){
             this.nodeName=node.getNodeName();
             this.nodeId=node.getId();

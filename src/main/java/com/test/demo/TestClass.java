@@ -1,6 +1,9 @@
 package com.test.demo;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.test.demo.common.Invoke;
 import com.test.demo.model.Message;
 import com.test.demo.repository.MessageRepository;
 import com.test.demo.repository.MessageStateRepository;
@@ -10,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.logging.*;
+import java.util.logging.Formatter;
 
 import com.artofsolving.jodconverter.DocumentConverter;
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
@@ -23,19 +26,17 @@ public class TestClass {
 
     public static void main(String[] Args){
         try{
-//            office2PDF("D:\\2.doc","D:\\1.pdf");
-            String a="a";
-            switch (a){
-                case "a":
-                    System.out.println("aa");
-                case "b":
-                    System.out.println("bb");
-                    default:
-                    System.out.println("cc");
+            Class c= Invoke.class;
+            Method[] methods=c.getDeclaredMethods();
+            for(int i=0;i<methods.length;i++){
+                System.out.println(methods[i].getName());
             }
         }catch (Exception e){
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            System.out.println(e.toString());
+            System.out.println(ArrayUtil.join(e.getStackTrace(),"\n"));
         }
+
     }
 
     public static int office2PDF(String sourceFile, String destFile) throws FileNotFoundException {
@@ -68,5 +69,8 @@ public class TestClass {
         }
 
         return 1;
+    }
+    public void test(String a){
+        System.out.println("a:"+a);
     }
 }

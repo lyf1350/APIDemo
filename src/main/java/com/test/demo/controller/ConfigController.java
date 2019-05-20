@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +26,14 @@ public class ConfigController {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @PostMapping("/createOrSave")
+    @PostMapping("createOrSave")
     public JsonResult createOrSave(Config config){
         log.info("config:"+config);
+        if(config.getType().equals("holiday")){
+            Config temp=configRepository.findByConfigName(config.getConfigName());
+            if(temp!=null)
+                config.setId(temp.getId());
+        }
         return JsonResult.success(configRepository.save(config));
     }
 
@@ -45,5 +51,12 @@ public class ConfigController {
     @GetMapping("getTables")
     public JsonResult getTables(){
         return JsonResult.success(configRepository.findAllByType("table"));
+    }
+    @GetMapping("holiday")
+    public JsonResult getHolidays(){
+        List<Config> configs=configRepository.findAllByType("holiday");
+        Map<String,String> map=new HashMap<>();
+        configs.forEach(config -> map.put(config.getConfigName(),config.getVal()));
+        return JsonResult.success(map);
     }
 }

@@ -17,6 +17,9 @@ MySql
 3. 邮件发送，站内信
 4. 用户角色组模型，权限配置
 5. 文件上传下载，预览
+6. 日历模块
+7. 表可自由配置
+8. 流程节点action可自由配置
 
 
 ## 项目特点
@@ -28,14 +31,10 @@ MySql
 
 ## todoList
 
-1. 图表可自由配置
 2. 整合[adminLte](https://adminlte.io/themes/AdminLTE/)进入项目
 3. 权限配置支持注解
-4. 流程节点action可自由配置
 5. 使用FastDFS 上传下载文件
 6. 加入对redis的支持
 7. 加入消息中间件
-8. 丰富流程信息页
 9. 引入shiro
 10. 引入aspectj
-11. 添加日历模块

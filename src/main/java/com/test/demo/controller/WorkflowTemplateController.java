@@ -28,6 +28,8 @@ public class WorkflowTemplateController {
     NodeRepository nodeRepository;
     @Autowired
     WorkflowRepository workflowRepository;
+    @Autowired
+    ActionRepository actionRepository;
     @GetMapping("/list")
     public JsonResult getAllWorkflowTemplate(){
         return JsonResult.success(workflowTemplateRepository.findAll());
@@ -49,6 +51,7 @@ public class WorkflowTemplateController {
             if(temp==null){
                 nodeTemplate.setWorkflowTemplate(workflowTemplate);
                 nodeTemplate.setReviewers(reviewerRepository.saveAll(nodeTemplate.getReviewers()));
+                nodeTemplate.setActions(actionRepository.saveAll(nodeTemplate.getActions()));
                 temp=nodeTemplate;
             }else{
                 temp.setTemplateName(nodeTemplate.getTemplateName());
@@ -67,6 +70,21 @@ public class WorkflowTemplateController {
                     }
                 }
                 temp.setReviewers(reviewers);
+                List<Action> actions=new ArrayList<>();
+                for(Action action:nodeTemplate.getActions()){
+                    boolean find=false;
+                    for(Action action1:temp.getActions()){
+                        if(action.equals(action1)){
+                            find=true;
+                            actions.add(action1);
+                            break;
+                        }
+                    }
+                    if(!find){
+                        actions.add(actionRepository.save(action));
+                    }
+                }
+                temp.setActions(actions);
             }
             temp.setPreviousNodeTemplate(new ArrayList<>());
             temp.setNextNodeTemplate(new ArrayList<>());

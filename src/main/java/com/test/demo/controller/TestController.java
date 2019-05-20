@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
 
 @RestController
 @RequestMapping("/api/test")
@@ -30,11 +32,12 @@ public class TestController {
     JdbcTemplate jdbcTemplate;
     @GetMapping("")
     public JsonResult test(HttpServletRequest request) {
-        log.info("id:" + request.getSession().getId());
-        log.info("test api call user:" + request.getSession().getAttribute("user"));
-        List map=jdbcTemplate.queryForList("select * from file");
-        Console.log(map);
-        return  JsonResult.success(map);
+//        log.info("id:" + request.getSession().getId());
+//        log.info("test api call user:" + request.getSession().getAttribute("user"));
+//        List map=jdbcTemplate.queryForList("select * from file");
+//        Console.log(map);
+        log.info(request.getRequestURL().toString());
+        return  JsonResult.success("");
     }
 
     @GetMapping("/test2/{id}")
@@ -83,7 +86,6 @@ public class TestController {
 
     @GetMapping("/3")
     public JsonResult test3(String para) {
-
         return JsonResult.success(para);
     }
 
