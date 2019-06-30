@@ -31,10 +31,8 @@ MySql
 
 ## todoList
 
-2. 整合[adminLte](https://adminlte.io/themes/AdminLTE/)进入项目
-3. 权限配置支持注解
+1. 整合[adminLte](https://adminlte.io/themes/AdminLTE/)进入项目
 5. 使用FastDFS 上传下载文件
 6. 加入对redis的支持
 7. 加入消息中间件
-9. 引入shiro
-10. 引入aspectj
+8. elasticsearch进行全文检索

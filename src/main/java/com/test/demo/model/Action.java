@@ -41,8 +41,7 @@ public class Action {
             if(m!=null)
                 return m.invoke(c.newInstance(),actionArguments);
         }catch (Exception e){
-            log.error(e.getMessage());
-            log.error(ArrayUtil.join(e.getStackTrace(),"\n"));
+            log.error("Action 调用异常",e);
         }
         return "execute action:"+action+" failed";
     }

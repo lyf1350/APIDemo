@@ -10,12 +10,13 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @Data
 @JSONType(ignores = {"password"})
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue
     Long id;

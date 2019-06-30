@@ -8,6 +8,7 @@ import lombok.Data;
 public class JsonResult {
     private boolean success = true;
     private String msg;
+    private Integer code;
     private Object data;
 
     public JsonResult() {
@@ -17,6 +18,11 @@ public class JsonResult {
     public JsonResult(String msg) {
         this.msg = msg;
     }
+    public JsonResult(String msg,Integer code) {
+        this.msg = msg;
+        this.code=code;
+    }
+
 
     public static JsonResult success() {
         return new JsonResult();
@@ -40,6 +46,11 @@ public class JsonResult {
 
     public static JsonResult error(String msg) {
         JsonResult jr = new JsonResult(msg);
+        jr.setSuccess(false);
+        return jr;
+    }
+    public static JsonResult error(String msg,Integer code) {
+        JsonResult jr = new JsonResult(msg,code);
         jr.setSuccess(false);
         return jr;
     }

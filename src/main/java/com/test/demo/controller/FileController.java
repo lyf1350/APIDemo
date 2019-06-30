@@ -4,14 +4,22 @@ package com.test.demo.controller;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSON;
 import com.test.demo.common.JsonResult;
+import com.test.demo.model.ESFile;
 import com.test.demo.model.User;
+import com.test.demo.repository.ESFileRepository;
 import com.test.demo.repository.FileRepository;
 import com.test.demo.util.ConvertUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +36,13 @@ import java.util.UUID;
 public class FileController {
     @Autowired
     FileRepository fileRepository;
-    private final String dir="D:/upload/";
+    @Autowired
+    ESFileRepository esFileRepository;
+    @Value("${file.dir}")
+    private  String dir;
+    @Value(("#{'${file.office}'.split(',')}"))
+    List<String> officeList;
+    Tika tika=new Tika();
     @GetMapping("/list")
     @ApiOperation("获得所有文件")
     public JsonResult getAllFiles() {
@@ -88,16 +102,19 @@ public class FileController {
     public JsonResult uploadFile(MultipartFile file,@SessionAttribute User user) throws Exception {
         if (file.isEmpty())
             return JsonResult.error("上传失败");
+        log.info("officeList:"+officeList);
+        log.info("dir");
         String name = file.getOriginalFilename();
         String suffix = name.substring(name.lastIndexOf('.'));
         String uuid = UUID.randomUUID().toString();
-        List suffixList = Arrays.asList(".xls", ".xlsx", ".doc", ".docx", ".ppt", ".pptx");
-        file.transferTo(new File(dir + uuid + suffix));
-        if (suffixList.contains(suffix)) {
-            ConvertUtil.office2PDF(dir + uuid + suffix, dir + uuid + ".pdf");
-        }
+        File file2=new File(dir + uuid + suffix);
+        file.transferTo(file2);
 
-
+//        List suffixList = Arrays.asList(".xls", ".xlsx", ".doc", ".docx", ".ppt", ".pptx");
+//        if (suffixList.contains(suffix)) {
+//            ConvertUtil.office2PDF(dir + uuid + suffix, dir + uuid + ".pdf");
+//        }
+        esFileRepository.save(new ESFile(uuid,name,tika.parseToString(new FileInputStream(file2))));
         return JsonResult.success(fileRepository.save(new com.test.demo.model.File(name, uuid, suffix,user)));
     }
 
@@ -127,7 +144,12 @@ public class FileController {
                 files.add(temp);
         });
         return  JsonResult.success(files);
+    }
 
+    @GetMapping("/search")
+    public JsonResult search(String keyword){
+        SearchQuery searchQuery=new NativeSearchQueryBuilder().withQuery(new QueryStringQueryBuilder(keyword)).build();
+        return JsonResult.success(esFileRepository.search(searchQuery));
     }
 
 }
