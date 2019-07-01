@@ -29,6 +29,8 @@ public class File {
     @JoinColumn
     @ManyToOne
     User uploader;
+    @Column
+    String type="default";
 
     public File(String fileName, String uuid,String suffix,User uploader) {
         this.fileName = fileName;
